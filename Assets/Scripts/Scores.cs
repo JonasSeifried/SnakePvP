@@ -5,15 +5,19 @@ using System;
 
 public class Scores : MonoBehaviour {
     
-    [SerializeField] private TMP_Text sP1;
-    [SerializeField] private TMP_Text sP2;
+    [SerializeField] private TMP_Text playerText;
+    [SerializeField] private TMP_Text enemyText;
+    private int playerScore;
+    private int enemyScore;
 
-    public void UpdateOwnText(int score) {
-        sP1.text = score + "/20";
+    private void LateUpdate()
+    {
+        if (playerScore != GameManager.Singleton.playerScore || enemyScore != GameManager.Singleton.enemyScore) {
+            playerScore = GameManager.Singleton.playerScore;
+            enemyScore = GameManager.Singleton.enemyScore;
+        }
+            playerText.text = playerScore.ToString();
+            enemyText.text = enemyScore.ToString();
     }
-    public void UpdateEnemyText(int score) {
-        sP2.text = "Enemy: " + score + "/20";
-    }
-    
 
 }

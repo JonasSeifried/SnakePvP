@@ -7,13 +7,11 @@ using Unity.Netcode;
 
 public class SnakeNetwork : NetworkBehaviour {
     [SerializeField] GameObject segmentPrefab;
-    private Scores scores;
 
 
     private int height, width;
     private int startingSize;
     private bool hasMoved = false;
-    public NetworkVariable<int> score = new NetworkVariable<int>(0 ,NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public NetworkList<NetworkObjectReference> segmentReferenceList;
 
     private List<GameObject> segmentList;
@@ -29,9 +27,8 @@ public class SnakeNetwork : NetworkBehaviour {
 
     public override void OnNetworkSpawn() {
         GameManager.Singleton.OnStateChanged += OnStateChanged;
-        Food.OnFoodEaten += FoodEaten;
+        Food.OnFoodEaten += OnFoodEaten;
 
-        scores = GameObject.FindObjectOfType<Scores>();
         width = GameManager.Singleton.TileHorizontalCount;
         height = GameManager.Singleton.TileVerticalCount;
         startingSize = GameManager.Singleton.SnakeStartingSize;
@@ -107,20 +104,6 @@ public class SnakeNetwork : NetworkBehaviour {
         }
 
     }
-
-    private void OnTriggerEnter2D(Collider2D other) {
-        if(other.tag == "Food") {
-            if(IsOwner) {
-                score.Value++;
-            }
-            Food.OnFoodEaten?.Invoke(this, score.Value);
-
-        }
-        if(other.tag == "Player" || other.tag == "Segment") {
-            //gameover
-        }
-    }
-
     private void Move() {
         if(!IsOwner) {
             return;
@@ -153,18 +136,51 @@ public class SnakeNetwork : NetworkBehaviour {
         }
     }
 
-    void FoodEaten(object sender, int score) {
-        if(!IsOwner) return;
-        SnakeNetwork snake = sender as SnakeNetwork;
-        Debug.Log("New Score" + score);
-        if(snake == this) {
-            //Debug.Log("new Score = " + snake.score.Value);
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (!IsServer) return;
+        if(other.CompareTag("Food")) {
+            Food.OnFoodEaten?.Invoke(this, EventArgs.Empty);
+
+            if(IsOwner) {
+                GameManager.Singleton.playerScore++;
+                Grow();
+                OnFoodEatenClientRpc(false);
+            } else {
+                OnFoodEatenClientRpc(true);
+                GameManager.Singleton.enemyScore++;
+            }
+        } else if (other.CompareTag("Player")) {
+            //Remise
+
+        } else if (other.CompareTag("Segment")) {
+            //Death
+            GameManager.Singleton.gameOver(OwnerClientId);
+            NetworkObject networkObject = other.GetComponent<NetworkObject>();
+
+            if (OwnerClientId != networkObject.OwnerClientId) {
+                //killed by other
+            }
+        }
+    }
+
+
+    void OnFoodEaten(object sender, EventArgs e) {
+
+    //SnakeNetwork snake = sender as SnakeNetwork;
+
+    }
+
+    [ClientRpc]
+    void OnFoodEatenClientRpc(bool grow, ClientRpcParams clientRpcParams = default)
+    {
+        if (IsServer) return;
+        if(grow)
+        {
+            GameManager.Singleton.playerScore++;
             Grow();
-            scores.UpdateOwnText(score);
             return;
         }
-        //Debug.Log("Should update Enemyscore to " + snake.score.Value);
-        scores.UpdateEnemyText(score);
+        GameManager.Singleton.enemyScore++;
     }
 
     void Grow() {
@@ -176,7 +192,7 @@ public class SnakeNetwork : NetworkBehaviour {
         if(!IsServer) return;
         GameObject segment = Instantiate(segmentPrefab, pos, Quaternion.identity);
         
-        segment.GetComponent<NetworkObject>().SpawnWithOwnership(serverRpcParams.Receive.SenderClientId);
+        segment.GetComponent<NetworkObject>().SpawnWithOwnership(serverRpcParams.Receive.SenderClientId, true);
 
         ClientRpcParams clientRpcParams = new ClientRpcParams {
             Send = new ClientRpcSendParams {

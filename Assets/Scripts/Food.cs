@@ -6,12 +6,11 @@ using Unity.Netcode;
 
 public class Food : NetworkBehaviour {
     
-    public static EventHandler<int> OnFoodEaten;
+    public static EventHandler OnFoodEaten;
     private int width, height;
 
     private void Start() {
     GameManager.Singleton.OnStateChanged += OnStateChanged;
-
     }
 
     void OnStateChanged(object sender, EventArgs e) {

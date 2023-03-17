@@ -13,6 +13,10 @@ public class GameManager : NetworkBehaviour
     public int SnakeStartingSize { get; private set; } = 3;
     public float SnakeSpeed { get; private set; } = 0.15f;
 
+
+    public int playerScore = 0;
+    public int enemyScore = 0;
+
     public static GameManager Singleton { get; private set; }
     public event EventHandler OnStateChanged;
 
@@ -23,9 +27,12 @@ public class GameManager : NetworkBehaviour
         InGame,
         GameOver
     }
+
+    private NetworkVariable<ulong> winner = new NetworkVariable<ulong>(ulong.MaxValue);
     private NetworkVariable<State> state = new NetworkVariable<State>(State.Preparing);
     private NetworkVariable<float> CountdownTimer = new NetworkVariable<float>(3f);
     private NetworkVariable<float> gameTimer = new NetworkVariable<float>(0f);
+
     private const float GAME_TIMER_MAX = 180f;
     private bool runAfterStartCode = true;
     private bool allPlayersReady = false;
@@ -133,17 +140,35 @@ public class GameManager : NetworkBehaviour
                 }
                 break;
             case State.GameOver:
+                //winner set?
+                if(winner.Value != ulong.MaxValue)
+                {
+                    if(winner.Value == OwnerClientId)
+                    {
+                        //won
+                    } else
+                    {
+                        //lost
+                    }
+                }
                 break;
 
         }
     }
 
-    void FoodEaten(object sender, int score) {
+    void FoodEaten(object sender, EventArgs e) {
         if(!IsServer) return;
-        SnakeNetwork snake = sender as SnakeNetwork;
-        if(score >= 20) {
-            //State.Value = State.GameOver;
+        
+    }
+
+    public void gameOver(ulong looserClientId) {
+        foreach (NetworkClient networkClient in NetworkManager.ConnectedClientsList)
+        {
+            networkClient.PlayerObject = null;
+            if (networkClient.ClientId == looserClientId) continue;
+            winner.Value = networkClient.ClientId;
         }
+        state.Value = State.GameOver;
     }
 
 
@@ -151,7 +176,10 @@ public class GameManager : NetworkBehaviour
 
     public bool IsInGame() { return state.Value == State.InGame; }
     public bool IsCountingDown() { return state.Value == State.Countdown; }
+    public bool IsGameOver() { return state.Value == State.GameOver; }
     public float GetCountdownTimer() { return CountdownTimer.Value; }
+
+
 
 }
 
