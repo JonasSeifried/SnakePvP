@@ -24,7 +24,7 @@ public class GameOverUI : MonoBehaviour
         {
             NetworkManager.Singleton.Shutdown();
             Loader.Load(Loader.Scene.MainMenuScene);
-
+             
         });
         Hide();
 

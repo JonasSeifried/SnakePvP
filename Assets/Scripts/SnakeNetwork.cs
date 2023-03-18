@@ -12,6 +12,7 @@ public class SnakeNetwork : NetworkBehaviour {
     private int height, width;
     private int startingSize;
     private bool hasMoved = false;
+    private bool shouldGrow = false;
     public NetworkList<NetworkObjectReference> segmentReferenceList;
 
     private List<GameObject> segmentList;
@@ -36,14 +37,17 @@ public class SnakeNetwork : NetworkBehaviour {
     }
 
     private void Start() {
-        if(!IsOwner) return;
-        segmentList = new List<GameObject>();
-        segmentList.Add(this.gameObject);
+        if (GameManager.Singleton == null) Destroy(gameObject);
+        if (!IsOwner) return;
+        segmentList = new List<GameObject>
+        {
+            this.gameObject
+        };
         segmentReferenceList.Add(this.NetworkObject);
         RandomPosServerRpc();
         for (int i = 1; i < startingSize; i++)
         {
-            Grow();
+            shouldGrow = true;
             Move();
         }
     }
@@ -63,17 +67,15 @@ public class SnakeNetwork : NetworkBehaviour {
                 break;
         }   
     }
-
-    /*
+ 
     public override void OnNetworkDespawn()
     {
-        foreach (GameObject segment in segmentList)
+        foreach (NetworkObject segment in segmentReferenceList)
         {
-            if(segment == this.gameObject) continue;
-            segment.GetComponent<NetworkObject>().Despawn();
+            if(segment == this.NetworkObject) continue;
+            segment.Despawn();
         }
     }
-    */
 
 
     private void Update() {
@@ -105,14 +107,12 @@ public class SnakeNetwork : NetworkBehaviour {
 
     }
     private void Move() {
-        if(!IsOwner) {
+        if(!IsOwner || GameManager.Singleton.IsGameOver()) {
             return;
         }
+        
 
-        for (int i = segmentList.Count-1; i > 0; i--)
-        {
-            segmentList[i].transform.position = segmentList[i-1].transform.position;
-        }
+
 
         float x = Mathf.Round(this.transform.position.x) + direction.x;
         float y = Mathf.Round(this.transform.position.y) + direction.y;
@@ -125,25 +125,43 @@ public class SnakeNetwork : NetworkBehaviour {
             y = 0.0f;
         } else if (y < 0) {
             y = height-1;
-        } 
+        }
 
-        this.transform.position = new Vector3(x, y);
+        Vector3 nextPos = new Vector3(x, y);
+
+        for (int i = 0; i < segmentList.Count; i++)
+        {
+            Vector3 tmp = segmentList[i].transform.position;
+            segmentList[i].transform.position = nextPos;
+            nextPos = tmp;
+        }
+
+        if (shouldGrow)
+        {
+            Grow(nextPos);
+            shouldGrow = false;
+        }
+
+
         if (nextDirection != Vector2.zero) {
             direction = nextDirection;
             nextDirection = Vector2.zero;
         } else {
         hasMoved = true;
         }
+
+
     }
 
+
     private void OnTriggerEnter2D(Collider2D other) {
-        if (!IsServer) return;
+        if (!IsServer || !GameManager.Singleton.IsInGame()) return;
         if(other.CompareTag("Food")) {
             Food.OnFoodEaten?.Invoke(this, EventArgs.Empty);
 
             if(IsOwner) {
                 GameManager.Singleton.playerScore++;
-                Grow();
+                shouldGrow = true;
                 OnFoodEatenClientRpc(false);
             } else {
                 OnFoodEatenClientRpc(true);
@@ -177,14 +195,14 @@ public class SnakeNetwork : NetworkBehaviour {
         if(grow)
         {
             GameManager.Singleton.playerScore++;
-            Grow();
+            shouldGrow = true;
             return;
         }
         GameManager.Singleton.enemyScore++;
     }
 
-    void Grow() {
-        GrowServerRpc(segmentList[segmentList.Count - 1].transform.position);
+    void Grow(Vector3 pos) {
+        GrowServerRpc(pos);
     }
 
     [ServerRpc]

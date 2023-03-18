@@ -164,7 +164,7 @@ public class GameManager : NetworkBehaviour
     public void gameOver(ulong looserClientId) {
         foreach (NetworkClient networkClient in NetworkManager.ConnectedClientsList)
         {
-            networkClient.PlayerObject = null;
+            networkClient.PlayerObject.Despawn();
             if (networkClient.ClientId == looserClientId) continue;
             winner.Value = networkClient.ClientId;
         }
