@@ -72,7 +72,7 @@ public class SnakeNetwork : NetworkBehaviour {
     {
         foreach (NetworkObject segment in segmentReferenceList)
         {
-            if(segment == this.NetworkObject) continue;
+            if(segment == null || segment == this.NetworkObject) continue;
             segment.Despawn();
         }
     }

@@ -24,4 +24,5 @@ public static class Loader
     public static void LoadOnNetwork(Scene targetScene) {
         NetworkManager.Singleton.SceneManager.LoadScene(targetScene.ToString(), LoadSceneMode.Single);
     }
+
 }

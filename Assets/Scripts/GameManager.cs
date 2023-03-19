@@ -28,10 +28,10 @@ public class GameManager : NetworkBehaviour
         GameOver
     }
 
-    private NetworkVariable<ulong> winner = new NetworkVariable<ulong>(ulong.MaxValue);
-    private NetworkVariable<State> state = new NetworkVariable<State>(State.Preparing);
-    private NetworkVariable<float> CountdownTimer = new NetworkVariable<float>(3f);
-    private NetworkVariable<float> gameTimer = new NetworkVariable<float>(0f);
+    private NetworkVariable<ulong> winner = new(ulong.MaxValue);
+    private NetworkVariable<State> state = new(State.Preparing);
+    private NetworkVariable<float> CountdownTimer = new(3f);
+    private NetworkVariable<float> gameTimer = new(0f);
 
     private const float GAME_TIMER_MAX = 180f;
     private bool runAfterStartCode = true;
@@ -82,16 +82,15 @@ public class GameManager : NetworkBehaviour
 
     private void SceneManager_OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
-        foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        foreach (NetworkClient networkClient in NetworkManager.Singleton.ConnectedClientsList)
         {
+            if (networkClient.PlayerObject != null) continue;
             Transform snake = Instantiate(playerPrefab);
-            snake.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+            snake.GetComponent<NetworkObject>().SpawnAsPlayerObject(networkClient.ClientId, true);
         }
-        Debug.Log("All playerObjects got Instantiated");
     }
 
     private void OnStateValueChanged(State prev, State curr) {
-        Debug.Log("State changed to " + curr.ToString());
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -110,7 +109,6 @@ public class GameManager : NetworkBehaviour
         }
         if(allReady) {
             allPlayersReady = true;
-            Debug.Log("All Players are Ready");
         }
     }
 
@@ -178,6 +176,8 @@ public class GameManager : NetworkBehaviour
     public bool IsCountingDown() { return state.Value == State.Countdown; }
     public bool IsGameOver() { return state.Value == State.GameOver; }
     public float GetCountdownTimer() { return CountdownTimer.Value; }
+
+    public bool IsWinner() { return winner.Value == OwnerClientId; }
 
 
 

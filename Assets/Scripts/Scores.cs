@@ -10,14 +10,21 @@ public class Scores : MonoBehaviour {
     private int playerScore;
     private int enemyScore;
 
+
     private void LateUpdate()
     {
-        if (playerScore != GameManager.Singleton.playerScore || enemyScore != GameManager.Singleton.enemyScore) {
+        if (gameObject.activeSelf && GameManager.Singleton.IsGameOver()) Hide();
+
+        if (!GameManager.Singleton.IsInGame()) return;
+
+        if (playerScore != GameManager.Singleton.playerScore || enemyScore != GameManager.Singleton.enemyScore)
+        {
             playerScore = GameManager.Singleton.playerScore;
             enemyScore = GameManager.Singleton.enemyScore;
-        }
             playerText.text = playerScore.ToString();
             enemyText.text = enemyScore.ToString();
+        }
     }
 
+    private void Hide() => gameObject.SetActive(false);
 }

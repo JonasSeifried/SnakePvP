@@ -10,20 +10,24 @@ public class GameOverUI : MonoBehaviour
 {
     [SerializeField] Button playAgainButton;
     [SerializeField] Button mainMenuButton;
-    [SerializeField] TMP_Text headline;
-    // Start is called before the first frame update
+    [SerializeField] TMP_Text headlineText;
+    [SerializeField] TMP_Text mainText;
+
+    private const string WIN_TEXT = "You won!";
+    private const string LOSE_TEXT = "You lost";
+
+
     void Start()
     {
         GameManager.Singleton.OnStateChanged += OnGameStateChanged;
 
         playAgainButton.onClick.AddListener(() => {
-            Loader.LoadOnNetwork(Loader.Scene.LoadingScene);
+            SnakePvPMultiplayer.Singleton.Restart();
         });
 
         mainMenuButton.onClick.AddListener(() =>
         {
-            NetworkManager.Singleton.Shutdown();
-            Loader.Load(Loader.Scene.MainMenuScene);
+            SnakePvPMultiplayer.Singleton.Shutdown(true);
              
         });
         Hide();
@@ -36,6 +40,7 @@ public class GameOverUI : MonoBehaviour
     {
         if(GameManager.Singleton.IsGameOver())
         {
+            headlineText.text = GameManager.Singleton.IsWinner() ? WIN_TEXT : LOSE_TEXT;
             Show();
         }
         
