@@ -18,19 +18,9 @@ public class LoadingPlayerReady : NetworkBehaviour
         Assert.IsNull(Singleton, $"Multiple instances of {nameof(LoadingPlayerReady)} detected. This should not happen.");
         Singleton = this;
         playerReadyDict = new Dictionary<ulong, bool>();
-        SnakePvPLobby.Singleton.OnLobbyDeleted += Lobby_OnLobbyDeleted;
-        SnakePvPLobby.Singleton.OnPlayerLeavedLobby += Lobby_OnPlayerLeavedLobby;
     }
 
-    private void Lobby_OnPlayerLeavedLobby(object sender, EventArgs e)
-    {
-        Debug.Log("Player left lobby");
-    }
 
-    private void Lobby_OnLobbyDeleted(object sender, EventArgs e)
-    {
-        Debug.Log("Lobby deleted");
-    }
 
     public override void OnNetworkSpawn()
     {

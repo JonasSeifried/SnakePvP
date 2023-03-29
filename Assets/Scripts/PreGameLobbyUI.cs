@@ -40,8 +40,8 @@ public class PreGameLobbyUI : MonoBehaviour
     private void Start()
     {
         LoadingPlayerReady.Singleton.OnAllPlayersReady += Singleton_OnAllPlayersReady;
-        SnakePvPLobby.Singleton.OnLobbyDeleted += SnakePvPLobby_OnLobbyDeleted;
-        SnakePvPLobby.Singleton.OnPlayerLeavedLobby += SnakePvPLobby_OnPlayerLeavedLobby;
+        //SnakePvPLobby.Singleton.OnLobbyDeleted += SnakePvPLobby_OnLobbyDeleted;
+        //SnakePvPLobby.Singleton.OnPlayerLeavedLobby += SnakePvPLobby_OnPlayerLeavedLobby;
     }
 
     private void SnakePvPLobby_OnPlayerLeavedLobby(object sender, System.EventArgs e)
