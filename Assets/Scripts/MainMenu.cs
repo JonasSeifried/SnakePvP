@@ -25,8 +25,8 @@ public class MainMenu : MonoBehaviour
             Loader.Load(Loader.Scene.LobbyScene);
         });
         settingsBtn.onClick.AddListener(() => {
-            this.gameObject.SetActive(false);
-            settings.gameObject.SetActive(true);
+            //this.gameObject.SetActive(false);
+            //settings.gameObject.SetActive(true);
         });
         
         exitBtn.onClick.AddListener(() => {
