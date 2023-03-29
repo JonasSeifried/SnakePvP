@@ -30,7 +30,7 @@ public class MainMenu : MonoBehaviour
         });
         
         exitBtn.onClick.AddListener(() => {
-            SceneManager.LoadScene("SnakeScene");
+            Application.Quit();
         });
     }
 }
