@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
@@ -14,6 +13,9 @@ public class SnakePvPLobby : MonoBehaviour
     private const float heartbeatTimerMax = 15;
     private float heartbeatTimer = heartbeatTimerMax;
 
+    public event EventHandler OnPlayerLeavedLobby;
+    public event EventHandler OnLobbyDeleted;
+
     private void Awake()
     {
         Singleton = this;
@@ -22,13 +24,14 @@ public class SnakePvPLobby : MonoBehaviour
         InitializeUnityAuthentication();
     }
 
+
     private async void InitializeUnityAuthentication()
     {
         if(UnityServices.State != ServicesInitializationState.Initialized)
         {
 
             InitializationOptions options = new InitializationOptions();
-            options.SetProfile(Random.Range(0, 1000).ToString());
+            options.SetProfile(UnityEngine.Random.Range(0, 1000).ToString());
         await UnityServices.InitializeAsync(options);
 
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
@@ -52,10 +55,11 @@ public class SnakePvPLobby : MonoBehaviour
 
     public async void JoinLobby(string lobbyCode)
     {
+        if (lobbyCode.Length != 6) return;
         try
         {
-            Debug.Log(lobbyCode);
-            await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            
+            joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
             SnakePvPMultiplayer.Singleton.StartClient();
         }
         catch (LobbyServiceException e)
@@ -64,6 +68,45 @@ public class SnakePvPLobby : MonoBehaviour
             Debug.LogError(e.Message);
         }
 
+    }
+
+    public async void DeleteLobby()
+    {
+        if(joinedLobby != null)
+        {
+            try
+            {
+                await LobbyService.Instance.DeleteLobbyAsync(joinedLobby.Id);
+                OnLobbyDeleted.Invoke(this, EventArgs.Empty);
+            }
+            catch (LobbyServiceException e)
+            {
+
+                Debug.LogError(e.Message);
+            }
+        }
+    }
+
+    public async void LeaveLobby()
+    {
+        if (joinedLobby != null)
+        {
+            try
+            {
+                if(AuthenticationService.Instance.PlayerId == joinedLobby.HostId)
+                {
+                    DeleteLobby();
+                    return;
+                }
+                await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
+                OnPlayerLeavedLobby.Invoke(this, EventArgs.Empty);
+            }
+            catch (LobbyServiceException e)
+            {
+
+                Debug.LogError(e.Message);
+            }
+        }
     }
 
 
