@@ -12,9 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/LobbyScene.unity
     guid: aa5afe34aa393f9478bf31bc5b2f4b39
   - enabled: 1
-    path: Assets/Scenes/LoadingScene.unity
-    guid: 4818015886a284444b9433f0dbb40b9e
-  - enabled: 1
     path: Assets/Scenes/PreGameLobbyScene.unity
     guid: 73806f1de8fefa548ad139f7a3a37874
   - enabled: 1
