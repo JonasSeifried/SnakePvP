@@ -30,6 +30,7 @@ public class GameOverUI : MonoBehaviour
             SnakePvPMultiplayer.Singleton.Shutdown(true);
              
         });
+        if(SnakePvPMultiplayer.playSingleplayer) playAgainButton.gameObject.SetActive(false);
         Hide();
 
     }
