@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class SnakePvPMultiplayer : NetworkBehaviour
 {
-    private const int MAX_PLAYER = 2;
+    public const int MAX_PLAYER = 2;
 
     public static SnakePvPMultiplayer Singleton;
 
@@ -69,7 +69,7 @@ public class SnakePvPMultiplayer : NetworkBehaviour
 
     private void ConnectionApproval(NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse)
     {
-        if(SceneManager.GetActiveScene().name != Loader.Scene.LoadingScene.ToString()) {
+        if(SceneManager.GetActiveScene().name != Loader.Scene.PreGameLobbyScene.ToString()) {
             connectionApprovalResponse.Approved = false;
             connectionApprovalResponse.Reason = "Game already running!";
         }
@@ -104,5 +104,5 @@ public class SnakePvPMultiplayer : NetworkBehaviour
     public void Restart() => RestartServerRpc();
 
     [ServerRpc(RequireOwnership = false)]
-    private void RestartServerRpc() => Loader.LoadOnNetwork(Loader.Scene.LoadingScene);
+    private void RestartServerRpc() => Loader.LoadOnNetwork(Loader.Scene.PreGameLobbyScene);
 }

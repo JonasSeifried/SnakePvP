@@ -9,5 +9,6 @@ public class MainMenuCleanUp : MonoBehaviour
     {
         if (NetworkManager.Singleton != null) Destroy(NetworkManager.Singleton.gameObject);
         if (SnakePvPMultiplayer.Singleton != null) Destroy(SnakePvPMultiplayer.Singleton.gameObject);
+        if(SnakePvPLobby.Singleton != null) Destroy(SnakePvPLobby.Singleton.gameObject);
     }
 }
