@@ -9,7 +9,6 @@ public class ConnectingUI : MonoBehaviour
 {
     [SerializeField] TMP_Text messageText;
     [SerializeField] Button closeButton;
-    private const string FAILED_TO_CONNECT = "Failed to connect";
 
     private void Awake()
     {
@@ -17,35 +16,67 @@ public class ConnectingUI : MonoBehaviour
         {   
             SnakePvPMultiplayer.Singleton.Shutdown(false);
             Hide();
+            
         });
+        HideCloseButton();
     }
     private void Start()
     {
-        SnakePvPMultiplayer.Singleton.OnTryingToJoinGame += SnakePvPMultiplayer_OnTryingToJoinGame;
-        SnakePvPMultiplayer.Singleton.OnFailedToJoinGame += SnakePvPMultiplayer_OnFailedToJoinGame;
+        SnakePvPLobby.Singleton.OnTryingToJoin += Lobby_OnTryingToJoinGame;
+        SnakePvPLobby.Singleton.OnFailedToJoin += Lobby_OnFailedToJoinGame;
+        SnakePvPLobby.Singleton.OnLobbyCreation += Lobby_OnLobbyCreation;
+        SnakePvPLobby.Singleton.OnLobbyCreationFailed += Lobby_OnLobbyCreationFailed;
         Hide();
     }
 
-    private void SnakePvPMultiplayer_OnFailedToJoinGame(object sender, System.EventArgs e)
+    private void Lobby_OnLobbyCreationFailed(object sender, System.EventArgs e)
     {
-        messageText.text = NetworkManager.Singleton.DisconnectReason;
-
-        if (messageText.text == "") messageText.text = FAILED_TO_CONNECT;
+        ShowMessage("Failed to create Lobby!");
     }
 
-    private void SnakePvPMultiplayer_OnTryingToJoinGame(object sender, System.EventArgs e)
+    private void Lobby_OnLobbyCreation(object sender, System.EventArgs e)
     {
-        Show();
+        ShowMessage("Creating Lobby...");
+    }
+
+
+    private void Lobby_OnTryingToJoinGame(object sender, System.EventArgs e)
+    {
+        ShowCloseButton();
+        ShowMessage("Connecting...");
+        closeButton.onClick.AddListener(() =>
+        {
+            SnakePvPMultiplayer.Singleton.Shutdown(false);
+            Hide();
+        });
+        HideCloseButton();
+    }
+    private void Lobby_OnFailedToJoinGame(object sender, System.EventArgs e)
+    {
+        ShowMessage("Failed to connect");
+        ShowCloseButton();
     }
 
     private void OnDestroy()
     {
-        SnakePvPMultiplayer.Singleton.OnTryingToJoinGame -= SnakePvPMultiplayer_OnTryingToJoinGame;
-        SnakePvPMultiplayer.Singleton.OnFailedToJoinGame -= SnakePvPMultiplayer_OnFailedToJoinGame;
+        SnakePvPMultiplayer.Singleton.OnTryingToJoinGame -= Lobby_OnTryingToJoinGame;
+        SnakePvPMultiplayer.Singleton.OnFailedToJoinGame -= Lobby_OnFailedToJoinGame;
+        SnakePvPLobby.Singleton.OnLobbyCreation -= Lobby_OnLobbyCreation;
+        SnakePvPLobby.Singleton.OnLobbyCreationFailed -= Lobby_OnLobbyCreationFailed;
+    }
+
+    private void ShowMessage(string message)
+    {
+        Show();
+        messageText.text = message;
     }
 
 
 
     void Show() => gameObject.SetActive(true);
     void Hide() => gameObject.SetActive(false);
+
+    void ShowCloseButton() => closeButton.gameObject.SetActive(true);
+
+    void HideCloseButton() => closeButton.gameObject.SetActive(false);
 }

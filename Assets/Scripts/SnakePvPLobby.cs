@@ -21,8 +21,13 @@ public class SnakePvPLobby : MonoBehaviour
     private const float heartbeatTimerMax = 15;
     private float heartbeatTimer = heartbeatTimerMax;
 
-    public event EventHandler OnPlayerLeavedLobby;
+    public event EventHandler OnPlayerLeftLobby;
     public event EventHandler OnLobbyDeleted;
+    public event EventHandler OnLobbyCreation;
+    public event EventHandler OnLobbyCreationFailed;
+    public event EventHandler OnTryingToJoin;
+    public event EventHandler OnFailedToJoin;
+
 
     private void Awake()
     {
@@ -91,6 +96,7 @@ public class SnakePvPLobby : MonoBehaviour
     {
         try
         {
+            OnLobbyCreation.Invoke(this, EventArgs.Empty);
             joinedLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, SnakePvPMultiplayer.MAX_PLAYER, new CreateLobbyOptions { IsPrivate = isPrivate, });
 
             Allocation allocation = await AllocateRelay();
@@ -107,17 +113,16 @@ public class SnakePvPLobby : MonoBehaviour
         }
         catch (LobbyServiceException e)
         {
-
             Debug.LogError(e.Message);
+            OnLobbyCreationFailed.Invoke(this, EventArgs.Empty);
         }
     }
 
     public async void JoinLobby(string lobbyCode)
     {
-        if (lobbyCode.Length != 6) return;
         try
         {
-            
+            OnTryingToJoin.Invoke(this, EventArgs.Empty);
             joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
             string relayJoinCode = joinedLobby.Data[KEY_RELAY_JOIN_CODE].Value;
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
@@ -126,8 +131,8 @@ public class SnakePvPLobby : MonoBehaviour
         }
         catch (LobbyServiceException e)
         {
-
             Debug.LogError(e.Message);
+            OnFailedToJoin.Invoke(this, EventArgs.Empty);
         }
 
     }
@@ -139,7 +144,7 @@ public class SnakePvPLobby : MonoBehaviour
             try
             {
                 await LobbyService.Instance.DeleteLobbyAsync(joinedLobby.Id);
-                OnLobbyDeleted.Invoke(this, EventArgs.Empty);
+                joinedLobby = null;
             }
             catch (LobbyServiceException e)
             {
@@ -155,13 +160,13 @@ public class SnakePvPLobby : MonoBehaviour
         {
             try
             {
-                if(AuthenticationService.Instance.PlayerId == joinedLobby.HostId)
+                if(IsLobbyHost())
                 {
                     DeleteLobby();
                     return;
                 }
                 await LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id, AuthenticationService.Instance.PlayerId);
-                OnPlayerLeavedLobby.Invoke(this, EventArgs.Empty);
+                OnPlayerLeftLobby.Invoke(this, EventArgs.Empty);
             }
             catch (LobbyServiceException e)
             {
@@ -179,11 +184,14 @@ public class SnakePvPLobby : MonoBehaviour
 
     private async void HandleLobbyHeartbeat()
     {
-        if (joinedLobby != null)
+        
+        if (IsLobbyHost())
         {
+            
             heartbeatTimer -= Time.deltaTime;
-            if (heartbeatTimer < 0)
+            if (heartbeatTimer < 0f)
             {
+                Debug.Log("heartbeat");
                 heartbeatTimer = heartbeatTimerMax;
 
                 await LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
@@ -194,5 +202,10 @@ public class SnakePvPLobby : MonoBehaviour
     public Lobby GetLobby()
     {
         return joinedLobby;
+    }
+
+    public bool IsLobbyHost()
+    {
+        return joinedLobby != null && joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
     }
 }

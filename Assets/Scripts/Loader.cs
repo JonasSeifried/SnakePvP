@@ -13,8 +13,6 @@ public static class Loader
         SnakeScene,
     }
 
-    private static Scene targetScene;
-
 
     public static void Load(Scene targetScene) {
 

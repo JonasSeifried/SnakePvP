@@ -16,6 +16,8 @@ public class SnakePvPMultiplayer : NetworkBehaviour
     public event EventHandler OnFailedToJoinGame;
     public event EventHandler OnPlayerDataNetworkListChanged;
 
+    public static bool playSingleplayer = false;
+
     private NetworkList<PlayerData> playerDataNetworkList;
     private void Awake() {
 
@@ -27,6 +29,15 @@ public class SnakePvPMultiplayer : NetworkBehaviour
 
         playerDataNetworkList = new NetworkList<PlayerData>();
         playerDataNetworkList.OnListChanged += PlayerDataNetworkList_OnListChanged;
+    }
+
+    private void Start()
+    {
+        if(playSingleplayer)
+        {
+            StartHost();
+            Loader.LoadOnNetwork(Loader.Scene.SnakeScene);
+        }
     }
 
     private void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)

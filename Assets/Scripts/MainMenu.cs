@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] Button playBtn;
+    [SerializeField] Button multiplayerBtn;
+    [SerializeField] Button singleplayerBtn;
     [SerializeField] Button settingsBtn;
     [SerializeField] Button exitBtn;
     [SerializeField] Settings settings;
@@ -14,7 +15,12 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playBtn.onClick.AddListener(() => {
+        multiplayerBtn.onClick.AddListener(() => {
+            Loader.Load(Loader.Scene.LobbyScene);
+        });
+        singleplayerBtn.onClick.AddListener(() =>
+        {
+            SnakePvPMultiplayer.playSingleplayer = true;
             Loader.Load(Loader.Scene.LobbyScene);
         });
         settingsBtn.onClick.AddListener(() => {
