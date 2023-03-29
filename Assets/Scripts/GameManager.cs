@@ -169,9 +169,6 @@ public class GameManager : NetworkBehaviour
         state.Value = State.GameOver;
     }
 
-
-    public State GetState() {return state.Value;}
-
     public bool IsInGame() { return state.Value == State.InGame; }
     public bool IsCountingDown() { return state.Value == State.Countdown; }
     public bool IsGameOver() { return state.Value == State.GameOver; }

@@ -21,13 +21,13 @@ public class SnakeNetwork : NetworkBehaviour {
     private Vector2 input;
     public Vector2 direction { get; private set; } = Vector2.right;
     private Vector2 nextDirection = Vector2.zero;
+    private float moveTimer = 0f;
 
     private void Awake() {
         segmentReferenceList = new NetworkList<NetworkObjectReference>(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     }
 
     public override void OnNetworkSpawn() {
-        GameManager.Singleton.OnStateChanged += OnStateChanged;
         Food.OnFoodEaten += OnFoodEaten;
 
         width = GameManager.Singleton.TileHorizontalCount;
@@ -52,22 +52,6 @@ public class SnakeNetwork : NetworkBehaviour {
         }
     }
 
-    private void OnStateChanged(object sender, EventArgs e) {
-        if(!IsOwner) return;
-        switch(GameManager.Singleton.GetState()) {
-            case GameManager.State.Countdown:
-                break;
-            case GameManager.State.InGame:
-                InvokeRepeating("Move", 0f, GameManager.Singleton.SnakeSpeed);
-                break;
-            case GameManager.State.GameOver:
-                //Invoke("NetworkObject.Despawn()", 0.5f);
-                break;
-            default:
-                break;
-        }   
-    }
- 
     public override void OnNetworkDespawn()
     {
         foreach (NetworkObject segment in segmentReferenceList)
@@ -104,13 +88,21 @@ public class SnakeNetwork : NetworkBehaviour {
                 hasMoved = false;
             }
         }
+        if(GameManager.Singleton.IsInGame())
+        {
+            moveTimer -= Time.deltaTime;
+            if(moveTimer < 0f)
+            {
+                moveTimer = GameManager.Singleton.SnakeSpeed;
+                Move();
+            }
+        }
 
     }
     private void Move() {
         if(!IsOwner || GameManager.Singleton.IsGameOver()) {
             return;
         }
-        
 
 
 

@@ -17,8 +17,11 @@ public class PreGameLobbyUI : MonoBehaviour
     private const string WAITING_PLAYER_MSG = "waiting for other player..";
     private void Awake()
     {
-        lobbyCodeText.text = "Lobby Code: " + SnakePvPLobby.Singleton.GetLobby().LobbyCode;
-        statusText.text = WAITING_PLAYER_MSG;
+        if(SnakePvPLobby.Singleton.GetLobby() != null)
+        {
+            lobbyCodeText.text = "Lobby Code: " + SnakePvPLobby.Singleton.GetLobby().LobbyCode;
+            statusText.text = WAITING_PLAYER_MSG;
+        }        
 
         if (NetworkManager.Singleton.IsServer)
         {

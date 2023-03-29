@@ -16,6 +16,7 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         multiplayerBtn.onClick.AddListener(() => {
+            SnakePvPMultiplayer.playSingleplayer = false;
             Loader.Load(Loader.Scene.LobbyScene);
         });
         singleplayerBtn.onClick.AddListener(() =>
