@@ -118,14 +118,26 @@ public class SnakeNetwork : NetworkBehaviour {
         } else if (y < 0) {
             y = height-1;
         }
+        float zRotation = 0f;
+        if (direction.y == 1f) zRotation = 90f;
+        else if (direction.x == -1f) zRotation = 180;
+        else if (direction.y == -1f) zRotation = 270;
+
+
 
         Vector3 nextPos = new Vector3(x, y);
+        Quaternion nextRotation = Quaternion.Euler(0, 0, zRotation);
 
         for (int i = 0; i < segmentList.Count; i++)
         {
-            Vector3 tmp = segmentList[i].transform.position;
-            segmentList[i].transform.position = nextPos;
-            nextPos = tmp;
+            Transform segment = segmentList[i].transform;
+            Vector3 tmpPos = segment.transform.position;
+            Quaternion tmpRotation = segment.transform.rotation;
+            segment.transform.position = nextPos;
+            segment.transform.rotation = nextRotation;
+            segment.transform.localScale = new Vector3(1, Math.Max(1f - i * 0.1f, 0.8f), 1);
+            nextPos = tmpPos;
+            nextRotation = tmpRotation;
         }
 
         if (shouldGrow)
