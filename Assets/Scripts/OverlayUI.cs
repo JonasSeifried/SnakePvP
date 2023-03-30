@@ -13,6 +13,13 @@ public class OverlayUI : MonoBehaviour {
     private int enemyScore;
     private int currTime = GameManager.gameTimerMax;
     private int closeMessageAfter = 0;
+    private Animator infoTextanimator;
+
+    private void Awake()
+    {
+        infoTextanimator = infoText.GetComponent<Animator>();
+        HideMessage();
+    }
 
 
     private void LateUpdate()
@@ -49,6 +56,7 @@ public class OverlayUI : MonoBehaviour {
 
     public void ShowMessage(string message, int duration)
     {
+        infoTextanimator.SetTrigger("Start");
         infoText.gameObject.SetActive(true);
 
         infoText.text = message;
@@ -58,6 +66,7 @@ public class OverlayUI : MonoBehaviour {
 
     private void HideMessage()
     {
+        infoTextanimator.StopPlayback();
         infoText.gameObject?.SetActive(false);
     }
 }
