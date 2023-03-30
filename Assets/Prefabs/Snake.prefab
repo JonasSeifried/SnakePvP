@@ -149,7 +149,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d10998bfb6b28743864621cce75a93c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.15
   segmentPrefab: {fileID: 5891634289297525199, guid: fc64dd9f0fce8fb40acea64251568ec8, type: 3}
 --- !u!114 &1220312572203374174
 MonoBehaviour:
@@ -184,7 +183,7 @@ MonoBehaviour:
   SyncPositionZ: 0
   SyncRotAngleX: 0
   SyncRotAngleY: 0
-  SyncRotAngleZ: 0
+  SyncRotAngleZ: 1
   SyncScaleX: 0
   SyncScaleY: 0
   SyncScaleZ: 0

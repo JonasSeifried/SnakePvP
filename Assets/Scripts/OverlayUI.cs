@@ -42,7 +42,7 @@ public class OverlayUI : MonoBehaviour {
 
             if(currTime % 30  == 0)
             {
-                ShowMessage("Snake speed x 1.25", 3);
+                ShowMessage("Snake speed x 1.25", 2);
             }
 
             if (currTime == closeMessageAfter) HideMessage();
