@@ -12,7 +12,7 @@ public class GameManager : NetworkBehaviour
     public int TileVerticalCount { get; } = 9;
     public int SnakeStartingSize { get; private set; } = 3;
 
-
+    public static int gameTimerMax = 90;
     public int playerScore = 0;
     public int enemyScore = 0;
 
@@ -32,7 +32,7 @@ public class GameManager : NetworkBehaviour
     private NetworkVariable<float> CountdownTimer = new(3f);
     private NetworkVariable<float> gameTimer = new(0f);
 
-    private const float GAME_TIMER_MAX = 90f;
+    
     private bool runAfterStartCode = true;
     private bool allPlayersReady = false;
     private int currSecond = 0;
@@ -127,7 +127,7 @@ public class GameManager : NetworkBehaviour
             case State.Countdown:
                 CountdownTimer.Value -= Time.deltaTime;
                 if (CountdownTimer.Value < 0f) {
-                    gameTimer.Value = GAME_TIMER_MAX;
+                    gameTimer.Value = gameTimerMax;
                     state.Value = State.InGame;
                 }
                 break;
