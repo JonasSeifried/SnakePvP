@@ -93,7 +93,7 @@ public class SnakeNetwork : NetworkBehaviour {
             moveTimer -= Time.deltaTime;
             if(moveTimer < 0f)
             {
-                moveTimer = GameManager.Singleton.SnakeSpeed;
+                moveTimer = GameManager.Singleton.GetSnakeSpeed();
                 Move();
             }
         }
